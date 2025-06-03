@@ -1,0 +1,20 @@
+fastapi
+typing
+pydantic
+uvicorn[standard] # Inclui pydantic, etc.
+pydantic-settings # para Pydantic V2
+# OCR
+easyocr
+PyMuPDF
+Pillow
+# LLM (Hugging Face)
+transformers[torch] # ou transformers[tensorflow]
+sentencepiece # Muitas vezes necessário para tokenizers
+# torch # Se não instalado com transformers[torch] ou se precisar de versão específica (instalado no Dockerfile)
+# torchvision # Dependência do torch
+# torchaudio # Dependência do torch
+# Database
+pymongo
+# Outros
+python-multipart # Para UploadFile em FastAPI
+# uuid # (built-in, mas para clareza se você usar explicitamente)
