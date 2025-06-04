@@ -22,7 +22,7 @@ try:
             matcher_model = AutoModelForCausalLM.from_pretrained(matcher_model_name, torch_dtype=torch.float16, device_map="auto")
         else:
             print("Nenhuma GPU detectada ou torch não configurado para CUDA. Carregando modelo em CPU (pode ser lento para Gemma-2b-it).")
-            matcher_model = AutoModelForCausalLM.from_pretrained(matcher_model_name)
+            matcher_model = AutoModelForCausalLM.from_pretrained(matcher_model_name, torch_dtype=torch.bfloat16)
     except Exception as model_load_exc:
         print(f"Falha ao carregar modelo com otimizações: {model_load_exc}. Tentando carregamento padrão.")
         matcher_model = AutoModelForCausalLM.from_pretrained(matcher_model_name)
@@ -72,38 +72,44 @@ def find_best_match(query_jd: str, resume_data: List[Dict[str, str]]) -> Optiona
 
     # --- Prompt Aprimorado ---
     context = f"Analise os seguintes currículos em relação aos REQUISITOS DA VAGA abaixo.\n\n"
-    context += f"REQUISITOS DA VAGA: {query_jd}\n\n"
+    context += f"PERGUNTA: {query_jd}\n\n"
     context += "CURRÍCULOS PARA ANÁLISE:\n"
 
     for i, resume in enumerate(resume_data):
         context += f"--- CURRÍCULO {i+1} (Arquivo: {resume['file_name']}) ---\n"
-        resume_text_preview = (resume['text'][:1500] + '...') if len(resume['text']) > 1500 else resume['text'] # Reduzi um pouco para gemma-2b
+        resume_text_preview = (resume['text'][:1500] + '...') if len(resume['text']) > 1500 else resume['text']
         context += f"{resume_text_preview}\n\n"
     
     prompt_instructions = (
         "Tarefa:\n"
-        "1. Identifique qual dos currículos acima é o MAIS adequado para os REQUISITOS DA VAGA.\n"
-        "2. Forneça uma justificativa CLARA e DETALHADA para sua escolha, baseada especificamente no conteúdo dos currículos e como ele se alinha (ou não) aos REQUISITOS DA VAGA.\n\n"
-        "Responda OBRIGATORIAMENTE no seguinte formato, sem nenhum texto adicional antes ou depois das tags ARQUIVO e JUSTIFICATIVA:\n"
-        "ARQUIVO: [Escreva aqui o NOME EXATO do arquivo do currículo que você escolheu como o melhor]\n"
-        "JUSTIFICATIVA: [Escreva aqui a SUA ANÁLISE DETALHADA. Seja conciso mas completo. Não repita o texto do currículo, mas sim explique sua conclusão.]"
+        "1. Identifique qual dos currículos acima é o MAIS adequado com a pergunta. Pode ser mais de um\n"
+        "2. Forneça uma justificativa CLARA e DETALHADA para sua escolha, baseada especificamente no conteúdo dos currículos e como ele se alinha a PERGUNTA DO USUARIO.\n"
+        "RESPONDA APENAS COM O(S) NOME(S) DO(S) ARQUIVO(S) E A SUA JUSTIFICATIVA\n\n"
     )
     full_prompt = context + prompt_instructions
 
     placeholder_justificativa_template = "[Escreva aqui a SUA ANÁLISE DETALHADA. Seja conciso mas completo. Não repita o texto do currículo, mas sim explique sua conclusão.]"
 
-    print(f"DEBUG: Prompt para Gemma (primeiros 500 chars):\n{full_prompt[:500]}\n...\n--------------------")
+    #print(f"DEBUG: Prompt para Gemma (primeiros 500 chars):\n{full_prompt[:500]}\n...\n--------------------")
 
     try:
-        generated_outputs = text_generator(
+        """ generated_outputs = text_generator(
             full_prompt,
             temperature=0.1, # Temperatura muito baixa para respostas mais certas e menos criativas
             do_sample=True, # Precisa ser True para temperature ter efeito
-        )
+        ) """
+
+        input_text = full_prompt
+        input_ids = matcher_tokenizer(input_text, return_tensors="pt")
+
+        generated_outputs = matcher_model.generate(**input_ids)
         
-        raw_llm_response_with_prompt = generated_outputs[0]['generated_text']
+        raw_llm_response_with_prompt = matcher_tokenizer.decode(generated_outputs[0])
+
+        print(raw_llm_response_with_prompt)
         
-        llm_generated_part = ""
+        #print(raw_llm_response_with_prompt)
+        llm_generated_part = "vazio"
         if raw_llm_response_with_prompt.startswith(full_prompt):
              llm_generated_part = raw_llm_response_with_prompt[len(full_prompt):].strip()
         else:
@@ -114,7 +120,7 @@ def find_best_match(query_jd: str, resume_data: List[Dict[str, str]]) -> Optiona
                  llm_generated_part = raw_llm_response_with_prompt # Fallback
             print(f"AVISO: O prompt não foi encontrado no início da resposta completa do LLM, ou a resposta não continha '{model_turn_start}'. Usando heurística ou resposta completa para extração.")
 
-        print(f"DEBUG: Resposta isolada do LLM (Gemma):\n{llm_generated_part}\n--------------------")
+        print(f"\n\n\nDEBUG: Resposta isolada do LLM (Gemma):\n{llm_generated_part}\n--------------------")
 
         chosen_file = None
         justification = "O LLM não forneceu uma resposta no formato esperado."
