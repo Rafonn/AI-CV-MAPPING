@@ -17,6 +17,7 @@ Com o CV-AI, o usuário poderá dedicar mais tempo a entrevistas e estratégias 
 ## Tech Stack
 
 * **Linguagem:** Python 3.9+
+* **Biblioteca:** Pytorch (Para rodar fora do container apenas)
 * **Framework API:** FastAPI
 * **Servidor ASGI:** Uvicorn
 * **Bibliotecas OCR:** EasyOCR (com PyMuPDF para PDFs e Pillow para imagens)
@@ -25,6 +26,10 @@ Com o CV-AI, o usuário poderá dedicar mais tempo a entrevistas e estratégias 
 * **Conteinerização:** Docker
 
 ## IMPORTANTE
+
+**App projetado para uso em CPUs**
+
+Caso queira utilizá-lo com GPUs, instale a versão de GPU do pytorch, para o uso de CUDA.
 
 Com docker, a aplicação é mais lenta pois ele opera dentro de limites de recursos (principalmente RAM) que podem ser mais restritos do que quando você roda o script Python diretamente na sua máquina.
 Para resolver, crie ou edite o arquivo .wslconfig na sua pasta de usuário: C:\Users\<SeuNomeDeUsuario>\.wslconfig:
