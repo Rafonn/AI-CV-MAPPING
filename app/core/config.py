@@ -1,8 +1,12 @@
+import os
 from pydantic_settings import BaseSettings
+from dotenv import load_dotenv
 
 class Settings(BaseSettings):
-    MONGODB_URL: str = "mongodb+srv://rafael:Mpo69542507@cvcluster.6lt4vep.mongodb.net/?retryWrites=true&w=majority&appName=CvCLUSTER"
-    MONGODB_DATABASE_NAME: str = "resume_screener_db"
+    load_dotenv()
+
+    MONGODB_URL: str = os.getenv('MONGODB_URL')
+    MONGODB_DATABASE_NAME: str = os.getenv('MONGODB_DATABASE_NAME')
 
     class Config:
         env_file = ".env"

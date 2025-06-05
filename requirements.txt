@@ -18,3 +18,4 @@ pymongo
 # Outros
 python-multipart # Para UploadFile em FastAPI
 # uuid # (built-in, mas para clareza se você usar explicitamente)
+python-dotenv
