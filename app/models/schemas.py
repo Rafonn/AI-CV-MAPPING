@@ -1,33 +1,35 @@
+# app/models/schemas.py
 from pydantic import BaseModel, Field
-from typing import List, Optional, Dict, Any
-from uuid import UUID
+from typing import List, Optional, Dict, Any, Union
+from uuid import UUID, uuid4
 import datetime
-
-class ProcessRequest(BaseModel):
-    request_id: str # Ou UUID
-    user_id: str
-    query: Optional[str] = None
 
 class ResumeSummary(BaseModel):
     file_name: str
     summary: str
 
 class QueryMatch(BaseModel):
+    file_name: Optional[str] = None
+    justification: Optional[str] = None
+
+class ProcessingErrorDetail(BaseModel):
     file_name: str
-    justification: str
+    error: str
 
 class SummaryResponse(BaseModel):
     request_id: str
     summaries: List[ResumeSummary]
+    processing_errors: Optional[List[ProcessingErrorDetail]] = None
 
 class QueryResponse(BaseModel):
     request_id: str
-    best_match: Optional[QueryMatch]
+    best_match: Union[QueryMatch, str]
+    processing_errors: Optional[List[ProcessingErrorDetail]] = None
 
 class LogEntry(BaseModel):
     request_id: str
     user_id: str
-    timestamp: datetime.datetime = Field(default_factory=datetime.datetime.utcnow)
+    timestamp: datetime.datetime
     query: Optional[str] = None
     result: Dict[str, Any]
     error: Optional[str] = None
