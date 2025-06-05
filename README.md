@@ -129,8 +129,11 @@ Antes de começar, garanta que você tem os seguintes softwares instalados:
 
 ## Como usar?
 
-Após rodar a aplicação, abra a aba "Currículos", clique em "Try it out" e preencha os campos.
-Para mais de um currículo, clique em "add string item" e adicione quantos curríclos forem necessários.
+Após rodar a aplicação, acesse `127.0.0.1:8000/docs # Use a porta 8001 caso esteja usando Docker` abra a aba "Currículos", clique em "Try it out" e preencha os campos.
+Para mais de um currículo, clique em "add string item" e adicione quantos curríclos forem necessários. Clique em "Execute" e aguarde o fim do processo.
+
+Na sub-aba "Responses", logo abaixo de "Curl", estará a resolução que a IA encontrou.
+Abaixo disso, está um "Response" de exemplo, podendo mudar entre respostas de sumarios e de "match".
 
 **IMPORTANTE:** Quanto mais currículos forem analisados, maior será o processamento da máquina em que a aplicação está rodando.
 
