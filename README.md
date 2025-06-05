@@ -27,6 +27,8 @@ Com o CV-AI, o usuário poderá dedicar mais tempo a entrevistas e estratégias 
 
 ## IMPORTANTE
 
+**ACEITE OS TERMOS / LIBERE ACESSO NO gemma-2b-it aqui:** `https://huggingface.co/google/gemma-2b-it`
+
 **App projetado para uso em CPUs**
 
 Caso queira utilizá-lo com GPUs, instale a versão de GPU do pytorch, para o uso de CUDA.
